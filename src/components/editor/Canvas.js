@@ -1,5 +1,5 @@
 import React, { createRef, useEffect } from 'react';
-import { Layer, Stage } from 'react-konva';
+import { Layer, Stage, Transformer } from 'react-konva';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import {
@@ -39,11 +39,18 @@ const Canvas = () => {
     }
   };
 
-  const handleStageClick = (e) => {
+  const checkDeselct = (e) => {
+    // deselect when client clicked on empty area
     const clickedOnEmpty = e.target === e.target.getStage();
     if (clickedOnEmpty) {
       dispatch(setSelectedElem(null));
     }
+  };
+
+  const oldPos = React.useRef(null);
+  const onMouseDown = (e) => {
+    const isElement = e.target.findAncestor('.elements-container');
+    const isTransformer = e.target.findAncestor('Transaformer');
   };
 
   return (
@@ -53,8 +60,9 @@ const Canvas = () => {
           <Stage
             width={276}
             height={598}
-            onMouseDown={handleStageClick}
-            onTap={handleStageClick}
+            onMouseDown={checkDeselct}
+            onTap={checkDeselct}
+            onTouchStart={checkDeselct}
           >
             <Provider store={store}>
               <Layer ref={layerEl}>

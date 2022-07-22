@@ -6,6 +6,13 @@
   box-sizing: border-box;
 }
 
-body {
-  font-size: Ubuntu;
+body,
+html {
+  font-family: Ubuntu;
+  width: 100%;
+  height: 100%;
+}
+
+#canvas {
+  border: 1px solid #555;
 }

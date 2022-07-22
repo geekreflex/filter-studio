@@ -69,6 +69,7 @@ const AddImage = () => {
   const handleRandomImg = async () => {
     setLoading(true);
     let response = await fetch(randomImgUrl);
+    console.log(response);
     let blob = await response.blob();
     let reader = new FileReader();
     reader.readAsDataURL(blob);
