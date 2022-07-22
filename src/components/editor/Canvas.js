@@ -84,20 +84,30 @@ const Canvas = ({ loading }) => {
       y: Math.min(selection.current.y1, selection.current.y2),
       width: Math.abs(selection.current.x1 - selection.current.x2),
       height: Math.abs(selection.current.y1 - selection.current.y2),
+      fill: 'rgba(0, 161, 255, 0.3)',
     });
     node.getLayer().batchDraw();
   };
 
   const oldPos = React.useRef(null);
   const onMouseDown = (e) => {
+    const stage = trRef.current.getStage();
     const isElement = e.target.findAncestor('.elements-container');
     const isTransformer = e.target.findAncestor('Transformer');
+
+    // checks if clicked item is 'element' and node array length
+    // is less than 2, then we reset node to the currently
+    // selected element and add tranform anchor to element
+    if (e.target.hasName('element') && nodesArray.length < 2) {
+      setNodes([e.target]);
+      trRef.current.nodes([e.target]);
+    }
 
     if (isElement || isTransformer) {
       return;
     }
 
-    if (e.target.hasName('element')) {
+    if (e.target !== stage) {
       return;
     }
 
@@ -110,7 +120,7 @@ const Canvas = ({ loading }) => {
     updateSelectionRect();
   };
 
-  const onMouseUp = () => {
+  const onMouseUp = (e) => {
     dispatch(setDragging(false));
     oldPos.current = null;
     if (!selection.current.visible) {
@@ -123,6 +133,7 @@ const Canvas = ({ loading }) => {
       const elBox = elementNode.getClientRect();
       if (Konva.Util.haveIntersection(selBox, elBox)) {
         elements.push(elementNode);
+        nodesArray.push(elementNode);
         dispatch(setSelectedElem({ ...elementNode.attrs }));
       }
     });
@@ -139,8 +150,6 @@ const Canvas = ({ loading }) => {
       return;
     }
 
-    trRef.current.keepRatio(true);
-
     const pos = e.target.getStage().getPointerPosition();
     selection.current.x2 = pos.x;
     selection.current.y2 = pos.y;
@@ -156,6 +165,7 @@ const Canvas = ({ loading }) => {
     let stage = e.target.getStage();
     let layer = layerRef.current;
     let tr = trRef.current;
+
     // if click on empty area - remove all selections
     if (e.target === stage) {
       dispatch(setSelectedElem(null));
@@ -194,6 +204,10 @@ const Canvas = ({ loading }) => {
   };
 
   const onSelect = (e) => {
+    if (selectedElem) {
+      return;
+    }
+
     if (e.current !== undefined) {
       let temp = nodesArray;
       if (!nodesArray.includes(e.current)) temp.push(e.current);

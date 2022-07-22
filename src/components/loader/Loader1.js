@@ -25,6 +25,7 @@ const Wrap = styled.div`
   align-items: center;
   visibility: ${(props) => (props.visible ? 'visible' : 'hidden')};
   opacity: ${(props) => (props.visible ? '1' : '0')};
+  background-color: rgba(255, 255, 255, 0.5);
 
   .loader .line:nth-last-child(1) {
     animation: loadingC 0.6s 0.1s linear infinite;
