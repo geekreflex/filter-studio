@@ -31,8 +31,11 @@ const TextElem = ({ textProps, onSelect, onChange, tr }) => {
         onTap={() => onSelect(textRef)}
         {...textProps}
         align="center"
+        verticalAlign="middle"
         wrap="wrap"
+        name="element"
         draggable
+        dragDistance={50}
         onDblClick={handleEditText}
         onDblTap={handleEditText}
         onDragEnd={(e) => {
@@ -50,8 +53,8 @@ const TextElem = ({ textProps, onSelect, onChange, tr }) => {
           node.setAttrs({
             width: Math.max(node.width() * scaleX, 100),
             height: Math.max(node.height() * scaleY),
-            scaleX: 1,
-            scaleY: 1,
+            // scaleX: 1,
+            // scaleY: 1,
           });
         }}
         onTransformEnd={(e) => {

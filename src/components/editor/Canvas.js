@@ -12,11 +12,13 @@ import { ReactReduxContext, Provider } from 'react-redux';
 import ImageElem from '../elements/ImageElem';
 
 const Canvas = () => {
+  const Konva = window.Konva;
   const layerRef = useRef();
   const trRef = useRef();
+  const temp = new Konva.Rect({ fill: 'rgba(0,0,255,0.5' });
   const [nodesArray, setNodes] = React.useState([]);
+  const [selectionRectangle, setSelectionRectangle] = useState(temp);
   const dispatch = useDispatch();
-  const Konva = window.Konva;
   const { elements, selectedElem } = useSelector((state) => state.editor);
 
   useEffect(() => {
@@ -97,7 +99,7 @@ const Canvas = () => {
     const selBox = selectionRectRef.current.getClientRect();
 
     const elements = [];
-    layerRef.current.find('.rectangle').forEach((elementNode) => {
+    layerRef.current.find('.element').forEach((elementNode) => {
       const elBox = elementNode.getClientRect();
       if (Konva.Util.haveIntersection(selBox, elBox)) {
         elements.push(elementNode);
@@ -134,7 +136,7 @@ const Canvas = () => {
     }
 
     // do nothing if clicked NOT on our rectangles
-    if (!e.target.hasName('.image')) {
+    if (!e.target.hasName('.element')) {
       return;
     }
 

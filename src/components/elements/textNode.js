@@ -37,6 +37,10 @@ export const addTextNode = (
   textarea.style.transformOrigin = 'left top';
   textarea.style.textAlign = textNode.align();
   textarea.style.color = textNode.fill();
+  textarea.style.whiteSpace = 'normal';
+  textarea.style.textAlign = 'center';
+  textarea.style.textAlignLast = 'center';
+  textarea.style.verticalAlign = 'middle';
   let rotation = textNode.rotation();
   let transform = '';
   if (rotation) {

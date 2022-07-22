@@ -15,7 +15,7 @@ const ImageElem = ({ imageProps, onSelect, onChange, imageUrl }) => {
         onTap={() => onSelect(imageRef)}
         image={image}
         draggable
-        name="image"
+        name="element"
         onDragEnd={(e) => {
           onChange({
             ...imageProps,
