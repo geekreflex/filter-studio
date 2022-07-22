@@ -29,6 +29,7 @@ const ImageElem = ({
         onTap={onSelect}
         image={image}
         draggable
+        name="image"
         onDragEnd={(e) => {
           onChange({
             ...imageProps,

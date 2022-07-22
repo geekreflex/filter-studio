@@ -10,13 +10,13 @@ const TextElem = ({ textProps, isSelected, onSelect, onChange }) => {
   const dispatch = useDispatch();
   const [updatedText, setUpdatedText] = useState('');
 
-  useEffect(() => {
-    dispatch(saveToStorage());
-    if (isSelected) {
-      trRef.current.setNode(textRef.current);
-      trRef.current.getLayer().batchDraw();
-    }
-  }, [isSelected]);
+  // useEffect(() => {
+  //   dispatch(saveToStorage());
+  //   if (isSelected) {
+  //     trRef.current.setNode(textRef.current);
+  //     trRef.current.getLayer().batchDraw();
+  //   }
+  // }, [isSelected]);
 
   useEffect(() => {
     if (updatedText) {
@@ -36,14 +36,13 @@ const TextElem = ({ textProps, isSelected, onSelect, onChange }) => {
   return (
     <>
       <Text
-        onClick={onSelect}
-        onTap={onSelect}
+        ref={textRef}
+        onClick={() => onSelect(textRef)}
+        onTap={() => onSelect(textRef)}
         {...textProps}
         align="center"
         wrap="wrap"
-        ref={textRef}
         draggable
-        // padding={5}
         onDblClick={handleEditText}
         onDblTap={handleEditText}
         onDragEnd={(e) => {
@@ -55,14 +54,20 @@ const TextElem = ({ textProps, isSelected, onSelect, onChange }) => {
         }}
         onTransform={(e) => {
           const node = textRef.current;
+          const scaleX = node.scaleX();
+          const scaleY = node.scaleY();
+
+          // we will reset it back
+          node.scaleX(1);
+          node.scaleY(1);
           node.setAttrs({
-            width: Math.max(node.width() * node.scaleX(), 100),
+            width: Math.max(node.width() * scaleX, 100),
+            height: Math.max(node.height() * scaleY),
             scaleX: 1,
             // scaleY: 1,
           });
         }}
         onTransformEnd={(e) => {
-          console.log(22);
           const node = textRef.current;
           const scaleX = node.scaleX();
           const scaleY = node.scaleY();
