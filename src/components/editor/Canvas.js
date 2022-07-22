@@ -161,6 +161,18 @@ const Canvas = () => {
     layer.draw();
   };
 
+  const onSelect = (e) => {
+    if (e.current !== undefined) {
+      let temp = nodesArray;
+      if (!nodesArray.includes(e.current)) temp.push(e.current);
+      setNodes(temp);
+      trRef.current.nodes(nodesArray);
+      trRef.current.nodes(nodesArray);
+      trRef.current.getLayer().batchDraw();
+      dispatch(saveToStorage());
+    }
+  };
+
   return (
     <CanvasWrap>
       <ReactReduxContext.Consumer>
@@ -171,9 +183,9 @@ const Canvas = () => {
             onMouseDown={onMouseDown}
             onMouseMove={onMouseMove}
             onMouseUp={onMouseUp}
-            // onTap={onMouseDown}
             onTouchStart={checkDeselct}
             onClick={onClickTap}
+            onTap={onClickTap}
           >
             <Provider store={store}>
               <Layer ref={layerRef}>
@@ -185,18 +197,11 @@ const Canvas = () => {
                           key={element.id}
                           getKey={element.id}
                           textProps={element}
+                          tr={trRef.current}
                           isSelected={element.id === selectedElem?.id}
                           getLength={elements.length}
                           onSelect={(e) => {
-                            if (e.current !== undefined) {
-                              let temp = nodesArray;
-                              if (!nodesArray.includes(e.current))
-                                temp.push(e.current);
-                              setNodes(temp);
-                              trRef.current.nodes(nodesArray);
-                              trRef.current.nodes(nodesArray);
-                              trRef.current.getLayer().batchDraw();
-                            }
+                            onSelect(e);
                             dispatch(setSelectedElem(element));
                           }}
                           onChange={(newAttrs) => {
@@ -213,11 +218,14 @@ const Canvas = () => {
                     if (element.type === 'image') {
                       return (
                         <ImageElem
-                          key={i}
+                          key={element.id}
+                          getKey={element.id}
+                          getLength={elements.length}
                           imageProps={element}
                           imageUrl={element.content}
                           isSelected={element.id === selectedElem?.id}
-                          onSelect={() => {
+                          onSelect={(e) => {
+                            onSelect(e);
                             dispatch(setSelectedElem(element));
                           }}
                           onChange={(newAttrs) => {
@@ -242,6 +250,19 @@ const Canvas = () => {
                     }
                     return newBox;
                   }}
+                  anchorFill="#444"
+                  anchorStroke="#444"
+                  anchorSize={18}
+                  borderDash={[3, 3]}
+                  borderStroke="grey"
+                  anchorCornerRadius={50}
+                  padding={5}
+                  enabledAnchors={[
+                    'top-left',
+                    'top-right',
+                    'bottom-left',
+                    'bottom-right',
+                  ]}
                 />
                 <Rect fill="rgba(0,0,255,0.5)" ref={selectionRectRef} />
               </Layer>

@@ -1,22 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Text, Transformer } from 'react-konva';
+import { Text } from 'react-konva';
 import { useDispatch } from 'react-redux';
 import { saveToStorage, setTextValue } from '../../redux/editorSlice';
 import { addTextNode } from './textNode';
 
-const TextElem = ({ textProps, isSelected, onSelect, onChange }) => {
-  const trRef = useRef();
+const TextElem = ({ textProps, onSelect, onChange, tr }) => {
   const textRef = useRef();
   const dispatch = useDispatch();
   const [updatedText, setUpdatedText] = useState('');
-
-  // useEffect(() => {
-  //   dispatch(saveToStorage());
-  //   if (isSelected) {
-  //     trRef.current.setNode(textRef.current);
-  //     trRef.current.getLayer().batchDraw();
-  //   }
-  // }, [isSelected]);
 
   useEffect(() => {
     if (updatedText) {
@@ -27,7 +18,6 @@ const TextElem = ({ textProps, isSelected, onSelect, onChange }) => {
 
   const handleEditText = () => {
     const textNode = textRef.current;
-    const tr = trRef.current;
     const stage = textRef.current.getStage();
     const layer = textRef.current.getLayer();
     addTextNode(stage, layer, textNode, tr, setUpdatedText);
@@ -57,14 +47,11 @@ const TextElem = ({ textProps, isSelected, onSelect, onChange }) => {
           const scaleX = node.scaleX();
           const scaleY = node.scaleY();
 
-          // we will reset it back
-          node.scaleX(1);
-          node.scaleY(1);
           node.setAttrs({
             width: Math.max(node.width() * scaleX, 100),
             height: Math.max(node.height() * scaleY),
             scaleX: 1,
-            // scaleY: 1,
+            scaleY: 1,
           });
         }}
         onTransformEnd={(e) => {
@@ -84,30 +71,6 @@ const TextElem = ({ textProps, isSelected, onSelect, onChange }) => {
           });
         }}
       />
-      {isSelected && (
-        <Transformer
-          ref={trRef}
-          boundBoxFunc={(oldBox, newBox) => {
-            if (newBox.width < 100) {
-              return oldBox;
-            }
-            return newBox;
-          }}
-          anchorFill="#444"
-          anchorStroke="#444"
-          anchorSize={18}
-          borderDash={[3, 3]}
-          borderStroke="grey"
-          anchorCornerRadius={50}
-          padding={5}
-          enabledAnchors={[
-            'top-left',
-            'top-right',
-            'bottom-left',
-            'bottom-right',
-          ]}
-        />
-      )}
     </>
   );
 };
