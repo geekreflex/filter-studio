@@ -1,15 +1,13 @@
-import React, { createRef, useState } from 'react';
+import React, { createRef } from 'react';
 import { v1 as uuidv1 } from 'uuid';
 import { addImage, saveToStorage } from '../../redux/editorSlice';
 import { useDispatch } from 'react-redux';
 
-const AddImage = () => {
+const AddImage = ({ loading, setLoading }) => {
   const fileEl = createRef();
   const dispatch = useDispatch();
 
   const randomImgUrl = 'https://source.unsplash.com/random';
-
-  const [loading, setLoading] = useState(false);
 
   const handleAddImage = () => {
     fileEl.current.click();
@@ -68,48 +66,52 @@ const AddImage = () => {
 
   const handleRandomImg = async () => {
     setLoading(true);
-    let response = await fetch(randomImgUrl);
-    console.log(response);
-    let blob = await response.blob();
-    let reader = new FileReader();
-    reader.readAsDataURL(blob);
-    reader.onload = function (e) {
-      const id = uuidv1();
+    try {
+      let response = await fetch(randomImgUrl);
+      let blob = await response.blob();
+      let reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onload = function (e) {
+        const id = uuidv1();
 
-      let image = new Image();
-      image.src = randomImgUrl;
-      image.onload = function () {
-        setLoading(false);
-        let height = this.height;
-        let width = this.width;
-        let maxWidth = 200;
-        let maxHeight = 150;
-        let aspectW = width / maxWidth;
-        let aspectH = height / maxHeight;
+        let image = new Image();
+        image.src = randomImgUrl;
+        image.onload = function () {
+          setLoading(false);
+          let height = this.height;
+          let width = this.width;
+          let maxWidth = 200;
+          let maxHeight = 150;
+          let aspectW = width / maxWidth;
+          let aspectH = height / maxHeight;
 
-        if (aspectW > 1 || aspectH > 1) {
-          if (aspectW > aspectH) {
-            const data = {
-              type: 'image',
-              content: e.target.result,
-              id,
-              width: maxWidth,
-              height: height / aspectW,
-            };
-            dispatch(addImage(data));
-          } else {
-            const data = {
-              type: 'image',
-              content: e.target.result,
-              id,
-              width: width / aspectH,
-              height: maxHeight,
-            };
-            dispatch(addImage(data));
+          if (aspectW > 1 || aspectH > 1) {
+            if (aspectW > aspectH) {
+              const data = {
+                type: 'image',
+                content: e.target.result,
+                id,
+                width: maxWidth,
+                height: height / aspectW,
+              };
+              dispatch(addImage(data));
+            } else {
+              const data = {
+                type: 'image',
+                content: e.target.result,
+                id,
+                width: width / aspectH,
+                height: maxHeight,
+              };
+              dispatch(addImage(data));
+            }
           }
-        }
+        };
       };
-    };
+    } catch (error) {
+      setLoading(false);
+      console.log(error);
+    }
   };
 
   return (

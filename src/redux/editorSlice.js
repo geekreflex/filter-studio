@@ -3,6 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
   elements: [],
   selectedElem: null,
+  dragging: false,
 };
 
 const editorSlice = createSlice({
@@ -81,6 +82,9 @@ const editorSlice = createSlice({
       state.elements = [];
       state.selectedElem = null;
     },
+    setDragging(state, action) {
+      state.dragging = action.payload;
+    },
   },
 });
 
@@ -97,5 +101,6 @@ export const {
   moveToBottom,
   removeElem,
   removeAll,
+  setDragging,
 } = editorSlice.actions;
 export default editorSlice.reducer;

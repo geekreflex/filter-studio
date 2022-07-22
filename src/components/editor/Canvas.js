@@ -1,25 +1,29 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Layer, Rect, Stage, Transformer } from 'react-konva';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import {
   saveToStorage,
+  setDragging,
   setElements,
   setSelectedElem,
 } from '../../redux/editorSlice';
 import TextElem from '../elements/TextElem';
 import { ReactReduxContext, Provider } from 'react-redux';
 import ImageElem from '../elements/ImageElem';
+import Loader1 from '../loader/Loader1';
 
-const Canvas = () => {
+const Canvas = ({ loading }) => {
   const Konva = window.Konva;
   const layerRef = useRef();
   const trRef = useRef();
   const temp = new Konva.Rect({ fill: 'rgba(0,0,255,0.5' });
-  const [nodesArray, setNodes] = React.useState([]);
+  const [nodesArray, setNodes] = useState([]);
   const [selectionRectangle, setSelectionRectangle] = useState(temp);
   const dispatch = useDispatch();
-  const { elements, selectedElem } = useSelector((state) => state.editor);
+  const { elements, selectedElem, dragging } = useSelector(
+    (state) => state.editor
+  );
 
   useEffect(() => {
     const storageData = localStorage.getItem('editor-state')
@@ -32,6 +36,12 @@ const Canvas = () => {
     updateTextProps();
   }, [selectedElem]);
 
+  useEffect(() => {
+    setSelectionRectangle(selectionRectangle);
+    layerRef.current.add(selectionRectangle);
+    selectionRectangle.visible(false);
+  }, [selectionRectangle]);
+
   const updateTextProps = () => {
     if (selectedElem?.id) {
       const id = selectedElem.id;
@@ -41,15 +51,19 @@ const Canvas = () => {
       items.splice(index, 1);
       items.splice(index, 0, selectedElem);
       dispatch(setElements(items));
+    } else {
+      trRef.current.nodes([]);
+      setNodes([]);
     }
   };
 
   const checkDeselct = (e) => {
     // deselect when client clicked on empty area
     const clickedOnEmpty = e.target === e.target.getStage();
-    console.log(clickedOnEmpty);
     if (clickedOnEmpty) {
+      trRef.current.nodes([]);
       dispatch(setSelectedElem(null));
+      layerRef.current.remove(selectionRectangle);
     }
   };
 
@@ -77,8 +91,13 @@ const Canvas = () => {
   const oldPos = React.useRef(null);
   const onMouseDown = (e) => {
     const isElement = e.target.findAncestor('.elements-container');
-    const isTransformer = e.target.findAncestor('Transaformer');
+    const isTransformer = e.target.findAncestor('Transformer');
+
     if (isElement || isTransformer) {
+      return;
+    }
+
+    if (e.target.hasName('element')) {
       return;
     }
 
@@ -92,6 +111,7 @@ const Canvas = () => {
   };
 
   const onMouseUp = () => {
+    dispatch(setDragging(false));
     oldPos.current = null;
     if (!selection.current.visible) {
       return;
@@ -103,8 +123,10 @@ const Canvas = () => {
       const elBox = elementNode.getClientRect();
       if (Konva.Util.haveIntersection(selBox, elBox)) {
         elements.push(elementNode);
+        dispatch(setSelectedElem({ ...elementNode.attrs }));
       }
     });
+
     trRef.current.nodes(elements);
     selection.current.visible = false;
     // disable click event
@@ -116,6 +138,9 @@ const Canvas = () => {
     if (!selection.current.visible) {
       return;
     }
+
+    trRef.current.keepRatio(true);
+
     const pos = e.target.getStage().getPointerPosition();
     selection.current.x2 = pos.x;
     selection.current.y2 = pos.y;
@@ -123,6 +148,11 @@ const Canvas = () => {
   };
 
   const onClickTap = (e) => {
+    // do nothing if we didn't start selection
+    if (selectionRectangle.visible()) {
+      return;
+    }
+
     let stage = e.target.getStage();
     let layer = layerRef.current;
     let tr = trRef.current;
@@ -135,8 +165,8 @@ const Canvas = () => {
       return;
     }
 
-    // do nothing if clicked NOT on our rectangles
-    if (!e.target.hasName('.element')) {
+    // do nothing if clicked NOT on our elements
+    if (!e.target.hasName('element')) {
       return;
     }
 
@@ -175,6 +205,10 @@ const Canvas = () => {
     }
   };
 
+  const onDragStart = () => {
+    dispatch(setDragging(true));
+  };
+
   return (
     <CanvasWrap>
       <ReactReduxContext.Consumer>
@@ -202,6 +236,7 @@ const Canvas = () => {
                           tr={trRef.current}
                           isSelected={element.id === selectedElem?.id}
                           getLength={elements.length}
+                          onDragStart={onDragStart}
                           onSelect={(e) => {
                             onSelect(e);
                             dispatch(setSelectedElem(element));
@@ -226,6 +261,7 @@ const Canvas = () => {
                           imageProps={element}
                           imageUrl={element.content}
                           isSelected={element.id === selectedElem?.id}
+                          onDragStart={onDragStart}
                           onSelect={(e) => {
                             onSelect(e);
                             dispatch(setSelectedElem(element));
@@ -251,10 +287,18 @@ const Canvas = () => {
                       return oldBox;
                     }
                     return newBox;
+
+                    // const MAX_WIDTH=200
+                    // if (Math.abs(newBox.width) > MAX_WIDTH) {
+                    //   return oldBox;
+                    // }
+
+                    // return newBox;
                   }}
-                  anchorFill="#444"
-                  anchorStroke="#444"
-                  anchorSize={18}
+                  anchorFill="#030047"
+                  opacity={dragging ? 0.5 : 1}
+                  anchorStroke="none"
+                  anchorSize={15}
                   borderDash={[3, 3]}
                   borderStroke="grey"
                   anchorCornerRadius={50}
@@ -266,12 +310,13 @@ const Canvas = () => {
                     'bottom-right',
                   ]}
                 />
-                <Rect fill="rgba(0,0,255,0.5)" ref={selectionRectRef} />
+                <Rect fill={'rgba(0,0,255,0.5'} ref={selectionRectRef} />
               </Layer>
             </Provider>
           </Stage>
         )}
       </ReactReduxContext.Consumer>
+      <Loader1 isLoading={loading} />
     </CanvasWrap>
   );
 };
@@ -284,6 +329,7 @@ const CanvasWrap = styled.div`
   overflow: hidden;
   border: 1px solid #ddd;
   background-color: #fff;
+  position: relative;
 
   canvas {
     background-color: #e5e5e5 !important;

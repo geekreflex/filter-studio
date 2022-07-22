@@ -1,17 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import Canvas from './Canvas';
 import Controls from '../control/Controls';
 
 const Editor = () => {
+  const [loading, setLoading] = useState(false);
   return (
     <>
       <EditorWrap>
         <div className="canvas-wrap">
-          <Canvas />
+          <Canvas loading={loading} />
         </div>
         <div className="controls-wrap">
-          <Controls />
+          <Controls loading={loading} setLoading={setLoading} />
         </div>
       </EditorWrap>
     </>

@@ -2,7 +2,13 @@ import React, { useRef } from 'react';
 import { Image } from 'react-konva';
 import useImage from 'use-image';
 
-const ImageElem = ({ imageProps, onSelect, onChange, imageUrl }) => {
+const ImageElem = ({
+  imageProps,
+  onSelect,
+  onChange,
+  imageUrl,
+  onDragStart,
+}) => {
   const [image] = useImage(imageUrl);
   const imageRef = useRef();
 
@@ -16,6 +22,7 @@ const ImageElem = ({ imageProps, onSelect, onChange, imageUrl }) => {
         image={image}
         draggable
         name="element"
+        onDragStart={onDragStart}
         onDragEnd={(e) => {
           onChange({
             ...imageProps,
@@ -27,6 +34,8 @@ const ImageElem = ({ imageProps, onSelect, onChange, imageUrl }) => {
           const node = imageRef.current;
           const scaleX = node.scaleX();
           const scaleY = node.scaleY();
+          node.scaleX(1);
+          node.scaleY(1);
           onChange({
             ...imageProps,
             rotation: node.rotation(),

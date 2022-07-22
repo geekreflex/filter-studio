@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import { saveToStorage, setTextValue } from '../../redux/editorSlice';
 import { addTextNode } from './textNode';
 
-const TextElem = ({ textProps, onSelect, onChange, tr }) => {
+const TextElem = ({ textProps, onSelect, onChange, tr, onDragStart }) => {
   const textRef = useRef();
   const dispatch = useDispatch();
   const [updatedText, setUpdatedText] = useState('');
@@ -38,23 +38,13 @@ const TextElem = ({ textProps, onSelect, onChange, tr }) => {
         dragDistance={50}
         onDblClick={handleEditText}
         onDblTap={handleEditText}
+        onDragStart={onDragStart}
+        onDragMove={() => onSelect(textRef)}
         onDragEnd={(e) => {
           onChange({
             ...textProps,
             x: e.target.x(),
             y: e.target.y(),
-          });
-        }}
-        onTransform={(e) => {
-          const node = textRef.current;
-          const scaleX = node.scaleX();
-          const scaleY = node.scaleY();
-
-          node.setAttrs({
-            width: Math.max(node.width() * scaleX, 100),
-            height: Math.max(node.height() * scaleY),
-            // scaleX: 1,
-            // scaleY: 1,
           });
         }}
         onTransformEnd={(e) => {

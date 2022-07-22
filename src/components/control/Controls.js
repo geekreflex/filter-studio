@@ -13,7 +13,7 @@ import {
 } from '../../redux/editorSlice';
 import AddImage from './AddImage';
 
-const Controls = () => {
+const Controls = ({ loading, setLoading }) => {
   const dispatch = useDispatch();
   const { selectedElem } = useSelector((state) => state.editor);
 
@@ -56,7 +56,7 @@ const Controls = () => {
   return (
     <ControlsWrap>
       <button onClick={handleAddText}>Add Text</button>
-      <AddImage />
+      <AddImage setLoading={setLoading} loading={loading} />
 
       {selectedElem && (
         <ElementControls>
